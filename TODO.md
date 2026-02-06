@@ -12,3 +12,4 @@ GPT Edit
 ## More Goals
 - [ ] Learn about git branches
 This is conflict branch
+added line in the conflict branch
