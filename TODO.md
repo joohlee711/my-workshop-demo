@@ -8,3 +8,6 @@
 ## Notes
 Things to remember
 GPT Edit
+
+## More Goals
+- [ ] Learn about git branches
