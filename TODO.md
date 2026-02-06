@@ -2,4 +2,8 @@
 
 ## Today
 - [ ] Go to sleep
-- [ ] Do laundry
+- [x] Do laundry
+- [ ] Read a book
+
+## Notes
+Things to remember
