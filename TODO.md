@@ -1,9 +1,9 @@
 # My To-Do List
 
 ## Today
- - [x] Go to sleep
+- [x] Go to sleep
 - [x] Do laundry
-- [ ] Read a book
+- [x] Read a book
 
 ## Notes
 Things to remember
