@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tamagotchi Lite</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --card: #fffaf2;
+      --ink: #2f2a25;
+      --accent: #d06b42;
+      --accent-2: #4f8f8b;
+      --danger: #b0463c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Trebuchet MS", "Verdana", sans-serif;
+      background: radial-gradient(circle at top, #fff 0%, var(--bg) 55%, #e8e1d3 100%);
+      color: var(--ink);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+    }
+    .shell {
+      width: min(780px, 94vw);
+      background: var(--card);
+      border: 4px solid #2e2a25;
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-size: 1.6rem;
+      margin: 0;
+      letter-spacing: 0.02em;
+    }
+    .chip {
+      background: #2f2a25;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 18px;
+    }
+    .pet-area {
+      background: #fef8ee;
+      border: 3px solid #2e2a25;
+      border-radius: 18px;
+      padding: 16px;
+      min-height: 300px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 10px;
+    }
+    .status {
+      display: grid;
+      gap: 8px;
+    }
+    .bar {
+      background: #ece5d8;
+      border: 2px solid #2e2a25;
+      border-radius: 999px;
+      height: 18px;
+      overflow: hidden;
+    }
+    .bar > span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #f2a65a);
+      width: 50%;
+      transition: width 0.3s ease;
+    }
+    .bar.happy > span { background: linear-gradient(90deg, var(--accent-2), #76c7c0); }
+    .bar.energy > span { background: linear-gradient(90deg, #8b5cf6, #c4b5fd); }
+    .bar.health > span { background: linear-gradient(90deg, #5abf62, #9be26a); }
+    .pet-screen {
+      background: #e2f7f3;
+      border: 3px solid #2e2a25;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .pet {
+      font-size: 3.5rem;
+      transition: transform 0.2s ease;
+    }
+    .pet.bounce { transform: translateY(-6px) scale(1.03); }
+    .bubble {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #fff;
+      border: 2px solid #2e2a25;
+      border-radius: 12px;
+      padding: 6px 10px;
+      font-size: 0.9rem;
+      max-width: 70%;
+      box-shadow: 0 4px 0 #2e2a25;
+    }
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    button {
+      background: var(--accent);
+      color: #fff;
+      border: 2px solid #2e2a25;
+      border-radius: 12px;
+      padding: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #2e2a25;
+      transition: transform 0.05s ease, box-shadow 0.05s ease;
+    }
+    button:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #2e2a25;
+    }
+    button.secondary { background: var(--accent-2); }
+    button.danger { background: var(--danger); }
+    .side {
+      display: grid;
+      gap: 14px;
+    }
+    .panel {
+      background: #fff;
+      border: 3px solid #2e2a25;
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .panel h2 {
+      margin: 0 0 8px 0;
+      font-size: 1.05rem;
+    }
+    .log {
+      font-size: 0.9rem;
+      min-height: 160px;
+      display: grid;
+      gap: 6px;
+    }
+    .log div {
+      background: #f3eee4;
+      border-radius: 8px;
+      padding: 6px 8px;
+    }
+    .footer {
+      text-align: center;
+      font-size: 0.85rem;
+      margin-top: 12px;
+      color: #5b5348;
+    }
+    @media (max-width: 680px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <h1>Tamagotchi Lite</h1>
+      <div class="chip" id="day">Day 1</div>
+    </header>
+
+    <div class="grid">
+      <section class="pet-area">
+        <div class="status">
+          <div>Hunger</div>
+          <div class="bar" aria-label="hunger"><span id="hungerBar"></span></div>
+          <div>Happiness</div>
+          <div class="bar happy" aria-label="happiness"><span id="happyBar"></span></div>
+          <div>Energy</div>
+          <div class="bar energy" aria-label="energy"><span id="energyBar"></span></div>
+          <div>Health</div>
+          <div class="bar health" aria-label="health"><span id="healthBar"></span></div>
+        </div>
+
+        <div class="pet-screen">
+          <div class="bubble" id="bubble">Hello!</div>
+          <div class="pet" id="pet">(•ᴗ•)</div>
+        </div>
+
+        <div class="controls">
+          <button id="feedBtn">Feed</button>
+          <button class="secondary" id="playBtn">Play</button>
+          <button class="secondary" id="napBtn">Nap</button>
+          <button class="danger" id="healBtn">Heal</button>
+        </div>
+      </section>
+
+      <aside class="side">
+        <div class="panel">
+          <h2>Status</h2>
+          <div id="statusText">Your buddy feels okay.</div>
+        </div>
+        <div class="panel">
+          <h2>Activity Log</h2>
+          <div class="log" id="log"></div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="footer">Keep the stats above 40 to stay healthy.</div>
+  </div>
+
+  <script>
+    const state = {
+      hunger: 70,
+      happy: 65,
+      energy: 60,
+      health: 80,
+      day: 1
+    };
+
+    const bars = {
+      hunger: document.getElementById('hungerBar'),
+      happy: document.getElementById('happyBar'),
+      energy: document.getElementById('energyBar'),
+      health: document.getElementById('healthBar')
+    };
+
+    const statusText = document.getElementById('statusText');
+    const log = document.getElementById('log');
+    const bubble = document.getElementById('bubble');
+    const pet = document.getElementById('pet');
+    const dayChip = document.getElementById('day');
+
+    function clamp(value) {
+      return Math.max(0, Math.min(100, value));
+    }
+
+    function updateBars() {
+      bars.hunger.style.width = `${state.hunger}%`;
+      bars.happy.style.width = `${state.happy}%`;
+      bars.energy.style.width = `${state.energy}%`;
+      bars.health.style.width = `${state.health}%`;
+    }
+
+    function updateMood() {
+      let message = 'Your buddy feels okay.';
+      if (state.health < 30) message = 'Your buddy is not feeling well.';
+      else if (state.hunger < 30) message = 'Your buddy is starving.';
+      else if (state.happy < 30) message = 'Your buddy feels lonely.';
+      else if (state.energy < 30) message = 'Your buddy is sleepy.';
+      else if (state.happy > 75 && state.hunger > 60) message = 'Your buddy is thriving!';
+      statusText.textContent = message;
+    }
+
+    function addLog(text) {
+      const item = document.createElement('div');
+      item.textContent = text;
+      log.prepend(item);
+      while (log.children.length > 6) log.removeChild(log.lastChild);
+    }
+
+    function pulsePet() {
+      pet.classList.add('bounce');
+      setTimeout(() => pet.classList.remove('bounce'), 200);
+    }
+
+    function say(text) {
+      bubble.textContent = text;
+    }
+
+    function tick() {
+      state.hunger = clamp(state.hunger - 4);
+      state.happy = clamp(state.happy - 2);
+      state.energy = clamp(state.energy - 3);
+
+      if (state.hunger < 20 || state.energy < 15) {
+        state.health = clamp(state.health - 4);
+      } else if (state.hunger > 60 && state.energy > 50) {
+        state.health = clamp(state.health + 1);
+      }
+
+      updateBars();
+      updateMood();
+    }
+
+    document.getElementById('feedBtn').addEventListener('click', () => {
+      state.hunger = clamp(state.hunger + 25);
+      state.happy = clamp(state.happy + 5);
+      say('Yum!');
+      addLog('Fed a tasty snack.');
+      pulsePet();
+      updateBars();
+      updateMood();
+    });
+
+    document.getElementById('playBtn').addEventListener('click', () => {
+      state.happy = clamp(state.happy + 20);
+      state.energy = clamp(state.energy - 10);
+      say('Let\'s play!');
+      addLog('Played a quick game.');
+      pulsePet();
+      updateBars();
+      updateMood();
+    });
+
+    document.getElementById('napBtn').addEventListener('click', () => {
+      state.energy = clamp(state.energy + 25);
+      state.hunger = clamp(state.hunger - 8);
+      say('Zzz...');
+      addLog('Took a short nap.');
+      pulsePet();
+      updateBars();
+      updateMood();
+    });
+
+    document.getElementById('healBtn').addEventListener('click', () => {
+      state.health = clamp(state.health + 30);
+      state.happy = clamp(state.happy - 5);
+      say('Feeling better.');
+      addLog('Used a healing kit.');
+      pulsePet();
+      updateBars();
+      updateMood();
+    });
+
+    setInterval(() => {
+      tick();
+      if (state.day < 99) {
+        state.day += 0.1;
+        dayChip.textContent = `Day ${Math.floor(state.day)}`;
+      }
+    }, 2000);
+
+    updateBars();
+    updateMood();
+    addLog('A new buddy arrived!');
+  </script>
+</body>
+</html>
